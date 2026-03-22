@@ -632,6 +632,37 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
 
   /* ── SRS mode in quiz config ── */
   .srs-info-box{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(99,102,241,.04));border:1.5px solid rgba(99,102,241,.3);border-radius:var(--rm);padding:10px 14px;margin-bottom:.9rem;font-size:.8rem;color:var(--accent2);font-weight:500;}
+
+  /* ── IMPORT CHOICE MODAL ── */
+  .import-choice-grid{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}
+  .import-choice-btn{
+    display:flex;align-items:center;gap:14px;
+    background:var(--bg3);border:1.5px solid var(--border2);
+    border-radius:var(--rm);padding:13px 16px;
+    cursor:pointer;transition:all .18s;text-align:left;width:100%;
+    font-family:var(--font-body);
+  }
+  .import-choice-btn:hover{border-color:var(--accent);background:rgba(99,102,241,.06);}
+  .import-choice-icon{font-size:1.5rem;flex-shrink:0;}
+  .import-choice-title{font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:2px;}
+  .import-choice-sub{font-size:.74rem;color:var(--muted2);}
+
+  /* ── MULTI-SERIES ── */
+  .set-card-selectable{position:relative;}
+  .set-checkbox{position:absolute;top:12px;right:12px;width:18px;height:18px;cursor:pointer;accent-color:var(--accent);}
+  .set-card.selected{border-color:var(--accent);background:rgba(99,102,241,.07);}
+  .multi-series-bar{
+    position:sticky;bottom:76px;left:0;right:0;
+    background:var(--bg2);border:1.5px solid var(--accent);
+    border-radius:var(--r);padding:12px 16px;
+    display:none;align-items:center;justify-content:space-between;
+    gap:12px;margin-top:1rem;
+    box-shadow:0 8px 30px rgba(99,102,241,.25);
+    z-index:50;
+  }
+  .multi-series-bar.show{display:flex;}
+  .multi-series-info{font-size:.85rem;font-weight:600;color:var(--accent2);}
+  .multi-series-sub{font-size:.72rem;color:var(--muted2);margin-top:2px;}
 </style>
 </head>
 <body>
@@ -1017,9 +1048,21 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
       <input id="inp-setname" placeholder="Nom de la série (ex: Italien - Voyage)" style="flex:1">
       <button class="btn btn-primary" onclick="saveCurrentAsSet()">Sauvegarder</button>
     </div>
-    <p style="font-size:.76rem;color:var(--muted);margin-bottom:1rem;">Sauvegarde ta liste actuelle pour la retrouver plus tard.</p>
+    <p style="font-size:.76rem;color:var(--muted);margin-bottom:.6rem;">Clique sur une série pour la charger · Coche pour sélectionner plusieurs séries.</p>
     <div class="sets-grid" id="sets-list"></div>
     <div id="empty-sets" class="empty-state"><div class="icon">📁</div><p>Aucune série sauvegardée.</p></div>
+
+    <!-- Barre multi-séries -->
+    <div class="multi-series-bar" id="multi-bar">
+      <div>
+        <div class="multi-series-info"><span id="multi-count">0</span> série(s) sélectionnée(s) · <span id="multi-words">0</span> mots</div>
+        <div class="multi-series-sub">Lance un quiz qui mélange toutes ces séries</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-secondary btn-sm" onclick="clearMultiSelect()">Effacer</button>
+        <button class="btn btn-primary btn-sm" onclick="startMultiSeriesQuiz()">Lancer →</button>
+      </div>
+    </div>
   </div>
 
 
@@ -1324,6 +1367,42 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
 </div>
 
 <!-- ══════════════ MODALS ══════════════ -->
+
+<!-- IMPORT CHOICE MODAL -->
+<div class="modal-overlay" id="modal-import-choice">
+  <div class="modal">
+    <h3>📥 Importer cette série</h3>
+    <p style="font-size:.8rem;color:var(--muted2);margin-bottom:.3rem">Que faire avec ta liste actuelle ?</p>
+    <div class="import-choice-grid">
+      <button class="import-choice-btn" onclick="applyImportChoice('save')">
+        <div class="import-choice-icon">💾</div>
+        <div>
+          <div class="import-choice-title">Sauvegarder puis remplacer</div>
+          <div class="import-choice-sub">Ta liste actuelle est sauvegardée automatiquement, puis remplacée par la nouvelle</div>
+        </div>
+      </button>
+      <button class="import-choice-btn" onclick="applyImportChoice('replace')">
+        <div class="import-choice-icon">🔄</div>
+        <div>
+          <div class="import-choice-title">Remplacer</div>
+          <div class="import-choice-sub">Ta liste actuelle est effacée et remplacée par la nouvelle série</div>
+        </div>
+      </button>
+      <button class="import-choice-btn" onclick="applyImportChoice('merge')">
+        <div class="import-choice-icon">🔀</div>
+        <div>
+          <div class="import-choice-title">Fusionner</div>
+          <div class="import-choice-sub">Les nouveaux mots s'ajoutent à ta liste existante sans rien effacer</div>
+        </div>
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- SHARE MODAL -->
 <div class="modal-overlay" id="modal-share">
   <div class="modal">
@@ -1394,7 +1473,7 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
         <strong>Maël Vervin</strong><br>
         Micro-entreprise — SIRET : <strong>Non applicable (particulier)</strong><br>
         Adresse : <strong>France</strong><br>
-        Contact : <strong>Email.ProKirkeOff@gmail.com</strong>
+        Contact : <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="83c6eee2eaefadd3f1ecc8eaf1e8e6cce5e5c3e4eee2eaefade0ecee">[email&#160;protected]</a></strong>
       </p>
       <h4>Hébergement</h4>
       <p>
@@ -1448,7 +1527,7 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
     <div class="legal-content">
       <p><em>Conforme au RGPD — Dernière mise à jour : décembre 2025</em></p>
       <h4>1. Responsable du traitement</h4>
-      <p><strong>Maël Vervin</strong> — contact : <strong>Email.ProKirkeOff@gmail.com</strong></p>
+      <p><strong>Maël Vervin</strong> — contact : <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e2a78f838b8eccb2908da98b908987ad8484a2858f838b8ecc818d8f">[email&#160;protected]</a></strong></p>
       <h4>2. Données collectées</h4>
       <p>Nous collectons uniquement :<br>
       • Votre adresse e-mail (authentification)<br>
@@ -1461,7 +1540,7 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
       <h4>5. Durée de conservation</h4>
       <p>Vos données sont conservées tant que votre compte est actif. Vous pouvez supprimer votre compte à tout moment en nous contactant.</p>
       <h4>6. Vos droits</h4>
-      <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de portabilité et d'opposition. Pour exercer ces droits : <strong>Email.ProKirkeOff@gmail.com</strong>.<br>
+      <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de portabilité et d'opposition. Pour exercer ces droits : <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="01446c60686d2f51736e4a68736a644e676741666c60686d2f626e6c">[email&#160;protected]</a></strong>.<br>
       Vous pouvez également introduire une réclamation auprès de la <strong>CNIL</strong> (cnil.fr).</p>
       <h4>7. Cookies</h4>
       <p>Ce site utilise uniquement le stockage local du navigateur (localStorage) pour mémoriser votre session. Aucun cookie tiers n'est utilisé.</p>
@@ -1474,7 +1553,7 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ══════════════════════════════════════════════════════════════
 // DÉCLARATIONS GLOBALES (toutes en haut pour éviter le TDZ)
 // ══════════════════════════════════════════════════════════════
@@ -1948,20 +2027,141 @@ function saveCurrentAsSet(){
   pushSets(); document.getElementById('inp-setname').value=''; toast('Série sauvegardée !','success');
 }
 function loadSet(i){
-  if(!confirm(`Charger "${sets[i].name}" ? Ta liste actuelle sera remplacée.`))return;
-  words=JSON.parse(JSON.stringify(sets[i].words)); pushWords(); showScreen('manage'); toast(`"${sets[i].name}" chargée !`,'success');
+  if(selectedSets.size > 0) { toggleSetSelect({stopPropagation:()=>{}}, i); return; }
+  showImportChoice(JSON.parse(JSON.stringify(sets[i].words)), sets[i].name);
 }
 function deleteSet(i){ if(!confirm('Supprimer ?'))return; sets.splice(i,1); pushSets(); }
 function renderSets(){
   const list=document.getElementById('sets-list'),empty=document.getElementById('empty-sets');
   if(!sets.length){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  list.innerHTML=sets.map((s,i)=>`<div class="set-card" onclick="loadSet(${i})">
-    <div><div class="set-name">${esc(s.name)}</div><div class="set-count">${s.words.length} mots · ${s.date}</div></div>
-    <div style="display:flex;gap:5px;align-items:center"><span class="set-badge">${s.words.length}</span>
-    <button class="btn-icon" onclick="event.stopPropagation();shareSet(${i})" title="Partager">🔗</button>
-    <button class="btn-icon" onclick="event.stopPropagation();deleteSet(${i})" style="color:var(--red)">×</button></div>
-  </div>`).join('');
+  list.innerHTML=sets.map((s,i)=>`
+    <div class="set-card set-card-selectable ${selectedSets.has(i)?'selected':''}" onclick="loadSet(${i})">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <input type="checkbox" class="set-checkbox" ${selectedSets.has(i)?'checked':''} 
+          onclick="toggleSetSelect(event,${i})" title="Sélectionner pour multi-séries">
+        <div style="flex:1;min-width:0">
+          <div class="set-name">${esc(s.name)}</div>
+          <div class="set-count">${s.words.length} mots · ${s.date}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <span class="set-badge">${s.words.length}</span>
+        <button class="btn-icon" onclick="event.stopPropagation();shareSet(${i})" title="Partager">🔗</button>
+        <button class="btn-icon" onclick="event.stopPropagation();deleteSet(${i})" style="color:var(--red)">×</button>
+      </div>
+    </div>`).join('');
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// IMPORT CHOICE SYSTEM
+// ══════════════════════════════════════════════════════════════
+let _pendingImportWords = []; // mots en attente d'être importés
+let _pendingImportName  = '';  // nom de la série (pour auto-save)
+
+function showImportChoice(wordsToImport, seriesName) {
+  _pendingImportWords = wordsToImport;
+  _pendingImportName  = seriesName || 'Série du ' + new Date().toLocaleDateString('fr-FR');
+  if(!words.length) {
+    // No current words — just replace directly
+    applyImportChoice('replace');
+    return;
+  }
+  openModal('modal-import-choice');
+}
+
+function applyImportChoice(mode) {
+  closeModal();
+  if(mode === 'save') {
+    // Auto-save current words first
+    sets.push({
+      name: 'Avant : ' + words.length + ' mots — ' + new Date().toLocaleDateString('fr-FR'),
+      words: JSON.parse(JSON.stringify(words)),
+      date: new Date().toLocaleDateString('fr-FR')
+    });
+    pushSets();
+    // Then replace
+    words = JSON.parse(JSON.stringify(_pendingImportWords));
+  } else if(mode === 'replace') {
+    words = JSON.parse(JSON.stringify(_pendingImportWords));
+  } else if(mode === 'merge') {
+    // Add only words not already present
+    let added = 0;
+    _pendingImportWords.forEach(w => {
+      if(!words.find(x => x.term.toLowerCase() === w.term.toLowerCase())) {
+        words.push(w); added++;
+      }
+    });
+    pushWords();
+    showScreen('manage');
+    toast(`${added} mots ajoutés (${_pendingImportWords.length - added} doublons ignorés)`, 'success');
+    _pendingImportWords = [];
+    return;
+  }
+  pushWords();
+  showScreen('manage');
+  const modeLabel = mode === 'save' ? 'Liste sauvegardée et remplacée' : 'Liste remplacée';
+  toast(`✓ ${modeLabel} — ${_pendingImportWords.length} mots chargés`, 'success');
+  _pendingImportWords = [];
+}
+
+// ══════════════════════════════════════════════════════════════
+// MULTI-SERIES QUIZ
+// ══════════════════════════════════════════════════════════════
+let selectedSets = new Set();
+
+function toggleSetSelect(e, i) {
+  e.stopPropagation();
+  if(selectedSets.has(i)) selectedSets.delete(i);
+  else selectedSets.add(i);
+  renderSets();
+  updateMultiBar();
+}
+
+function updateMultiBar() {
+  const bar = document.getElementById('multi-bar');
+  if(selectedSets.size < 1) {
+    bar.classList.remove('show');
+    return;
+  }
+  bar.classList.add('show');
+  const totalWords = [...selectedSets].reduce((acc, i) => acc + sets[i].words.length, 0);
+  document.getElementById('multi-count').textContent = selectedSets.size;
+  document.getElementById('multi-words').textContent = totalWords;
+}
+
+function clearMultiSelect() {
+  selectedSets.clear();
+  renderSets();
+  updateMultiBar();
+}
+
+function startMultiSeriesQuiz() {
+  if(!selectedSets.size) return;
+  // Merge all selected sets (deduplicate by term)
+  const merged = [];
+  const seen = new Set();
+  [...selectedSets].forEach(i => {
+    sets[i].words.forEach(w => {
+      if(!seen.has(w.term.toLowerCase())) {
+        merged.push(w);
+        seen.add(w.term.toLowerCase());
+      }
+    });
+  });
+  if(!merged.length) { toast('Aucun mot dans les séries sélectionnées.', 'error'); return; }
+  // Launch classic quiz with merged words
+  qRev=false; qCase=false; qLang=false; qMix=true;
+  qWords=shuffle([...merged]); qIdx=0; qScore=0; qResults=[];
+  qWordDirs=qWords.map(()=>Math.random()<.5?'reverse':'normal');
+  clearMultiSelect();
+  showScreen('quiz');
+  hide('quiz-mode-picker'); hide('quiz-config-panel'); hide('quiz-results');
+  hide('qcm-active'); hide('speed-active');
+  show('quiz-active');
+  renderQ();
+  toast(`Quiz multi-séries — ${merged.length} mots !`, 'success');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1981,14 +2181,15 @@ function parseLine(line){
 function doImport(){
   const raw=document.getElementById('import-text').value;
   if(!raw.trim()){toast('Zone vide !','error');return;}
-  let count=0,skipped=0;
+  const parsed=[];
+  let skipped=0;
   for(const line of raw.split(/\r\n|\r|\n/)){
     const p=parseLine(line);
-    if(p){words.push(p);count++;}else if(line.trim())skipped++;
+    if(p) parsed.push(p); else if(line.trim()) skipped++;
   }
-  if(!count){toast('Aucun mot reconnu. Format : mot : traduction','error');return;}
-  pushWords(); closeModal();
-  toast(skipped?`${count} mots importés (${skipped} ligne${skipped>1?'s':''} ignorée${skipped>1?'s':''})`:`${count} mots importés ✓`,'success');
+  if(!parsed.length){toast('Aucun mot reconnu. Format : mot : traduction','error');return;}
+  closeModal();
+  showImportChoice(parsed, 'Import manuel');
 }
 function exportWords(){
   if(!words.length){toast('Aucun mot à exporter.','error');return;}
@@ -2553,10 +2754,7 @@ function renderPublicSeries(){
 
 function importPublicSeries(i){
   const s = PUBLIC_SERIES[i];
-  if(!confirm(`Importer "${s.title}" (${s.words.length} mots) dans ta liste actuelle ?`)) return;
-  s.words.forEach(w=>{ if(!words.find(x=>x.term===w.term)) words.push(w); });
-  pushWords();
-  toast(`✓ ${s.words.length} mots de "${s.title}" importés !`, 'success');
+  showImportChoice(JSON.parse(JSON.stringify(s.words)), s.title);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2600,11 +2798,9 @@ function checkShareParam(){
 }
 
 function confirmShareImport(){
-  _shareImportData.forEach(w=>{ if(!words.find(x=>x.term===w.term)) words.push(w); });
-  pushWords();
+  const data = [..._shareImportData];
   closeModal();
-  toast(`✓ ${_shareImportData.length} mots importés !`,'success');
-  showScreen('manage');
+  showImportChoice(data, 'Série partagée');
 }
 
 
@@ -3040,6 +3236,7 @@ function toast(msg,type=''){
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function genCode(){ return Math.random().toString(36).slice(2,7).toUpperCase()+'-'+Math.random().toString(36).slice(2,7).toUpperCase(); }
 </script>
 </body>
 </html>
