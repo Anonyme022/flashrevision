@@ -729,6 +729,41 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
   .mode-picker-grid{grid-template-columns:repeat(3,1fr)!important;}
   @media(min-width:600px){.mode-picker-grid{grid-template-columns:repeat(4,1fr)!important;}}
   @media(min-width:1024px){.mode-picker-grid{grid-template-columns:repeat(4,1fr)!important;}}
+
+  /* ── COMMUNITY SERIES ── */
+  .community-section{margin-top:1.5rem;}
+  .community-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
+  .community-title{font-family:var(--font-display);font-size:1.2rem;font-weight:600;}
+  .community-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:99px;padding:3px;margin-bottom:1rem;}
+  .ctab{flex:1;text-align:center;padding:6px 10px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--muted2);transition:all .2s;}
+  .ctab.active{background:var(--accent);color:#fff;}
+  .community-series-list{display:flex;flex-direction:column;gap:9px;}
+  .community-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--rm);padding:.9rem 1.1rem;transition:all .18s;}
+  .community-card:hover{border-color:var(--accent2);}
+  .community-card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;}
+  .community-card-info{flex:1;min-width:0;}
+  .community-card-name{font-weight:700;font-size:.9rem;margin-bottom:2px;}
+  .community-card-meta{font-size:.72rem;color:var(--muted2);}
+  .community-card-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+  .community-empty{text-align:center;padding:2rem 1rem;color:var(--muted);}
+  .community-empty .icon{font-size:2rem;margin-bottom:.6rem;}
+  .community-empty p{font-size:.83rem;}
+  .publish-btn-wrap{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(99,102,241,.03));border:1.5px dashed rgba(99,102,241,.3);border-radius:var(--rm);padding:1rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1rem;}
+  .publish-btn-wrap:hover{border-color:var(--accent);background:rgba(99,102,241,.08);}
+  .publish-btn-wrap p{font-size:.78rem;color:var(--muted2);margin-top:4px;}
+  .anon-badge{font-size:.65rem;padding:2px 7px;border-radius:99px;background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.25);font-weight:600;}
+  .own-badge{font-size:.65rem;padding:2px 7px;border-radius:99px;background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.25);font-weight:600;}
+  .admin-badge{font-size:.65rem;padding:2px 7px;border-radius:99px;background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.25);font-weight:600;}
+  .sort-select{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);border-radius:99px;padding:4px 10px;font-size:.74rem;cursor:pointer;}
+
+  /* ── ADMIN PANEL ── */
+  .admin-card{background:linear-gradient(135deg,rgba(245,200,66,.08),rgba(245,200,66,.02));border:1.5px solid rgba(245,200,66,.3);border-radius:var(--r);padding:1.3rem;margin-top:1rem;}
+  .admin-card-title{font-weight:700;font-size:.92rem;color:var(--gold);margin-bottom:.8rem;display:flex;align-items:center;gap:8px;}
+  .admin-uid-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rm);padding:8px 12px;font-size:.8rem;margin-bottom:6px;}
+  .admin-uid-email{font-weight:600;color:var(--text);}
+  .admin-uid-id{font-family:monospace;font-size:.72rem;color:var(--muted2);}
+  .verified-badge{font-size:.65rem;padding:2px 7px;border-radius:99px;background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.25);font-weight:600;}
+  .unverified-badge{font-size:.65rem;padding:2px 7px;border-radius:99px;background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.25);font-weight:600;}
 </style>
 </head>
 <body>
@@ -1412,6 +1447,39 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
       </div>
     </div>
 
+    <!-- Admin panel (visible only to admins) -->
+    <div id="admin-panel" style="display:none">
+      <div class="admin-card">
+        <div class="admin-card-title">👑 Panneau Administrateur</div>
+
+        <!-- Admins list -->
+        <div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:6px">Admins supplémentaires</div>
+        <div id="admin-list" style="margin-bottom:10px"></div>
+
+        <!-- Add admin (owner only) -->
+        <div id="add-admin-section" style="display:none">
+          <div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:6px;margin-top:1rem">Ajouter un admin</div>
+          <div style="display:flex;gap:8px;margin-bottom:6px">
+            <input id="new-admin-uid" placeholder="UID Firebase du compte" style="flex:1;font-size:.8rem">
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:.4rem">
+            <input id="new-admin-label" placeholder="Nom / identifiant (ex: Modérateur 1)" style="flex:1;font-size:.8rem">
+            <button class="btn btn-primary btn-sm" onclick="addAdmin()">Ajouter</button>
+          </div>
+          <div style="font-size:.7rem;color:var(--muted)">L'UID Firebase se trouve dans Firebase Console → Authentication → liste des utilisateurs.</div>
+        </div>
+
+        <!-- Community moderation -->
+        <div style="margin-top:1.2rem;border-top:1px solid rgba(245,200,66,.2);padding-top:1rem">
+          <div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:.7rem">Modération communauté</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--red)" onclick="showScreen('discover');switchCTab('all')">Voir toutes les séries →</button>
+          </div>
+          <div style="font-size:.72rem;color:var(--muted2);margin-top:.5rem">En tant qu'admin tu peux supprimer n'importe quelle série communautaire sans code.</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Session -->
     <div style="text-align:center;padding:1.2rem 0 .5rem;">
       <button class="btn btn-secondary" onclick="signOut()" style="width:100%;border-color:rgba(248,113,113,.3);color:var(--red)">Se déconnecter</button>
@@ -1566,10 +1634,38 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
       </div>
     </div>
 
-    <!-- Séries publiques -->
-    <p class="section-title" style="margin-top:.3rem">Séries publiques</p>
-    <p style="font-size:.77rem;color:var(--muted);margin-bottom:1rem">Listes de vocabulaire vérifiées, issues des référentiels CECRL officiels.</p>
+    <!-- Séries officielles -->
+    <p class="section-title" style="margin-top:.3rem">Séries officielles</p>
+    <p style="font-size:.77rem;color:var(--muted);margin-bottom:1rem">Listes vérifiées, issues des référentiels CECRL officiels.</p>
     <div class="public-grid" id="public-series-list"></div>
+
+    <!-- Séries communautaires -->
+    <div class="community-section">
+      <div class="community-header">
+        <div class="community-title">🌍 Communauté</div>
+        <select class="sort-select" id="community-sort" onchange="loadCommunity()">
+          <option value="recent">Plus récentes</option>
+          <option value="popular">Plus importées</option>
+        </select>
+      </div>
+
+      <!-- Publier sa série -->
+      <div class="publish-btn-wrap" onclick="openPublishModal()">
+        <div style="font-size:1.3rem">📤</div>
+        <div style="font-weight:700;font-size:.88rem;margin-top:4px">Partager une de mes séries</div>
+        <p>Rends une série accessible à toute la communauté · Auteur anonyme</p>
+      </div>
+
+      <!-- Tabs : Toutes / Mes publications -->
+      <div class="community-tabs">
+        <div class="ctab active" id="ctab-all" onclick="switchCTab('all')">Toutes</div>
+        <div class="ctab" id="ctab-mine" onclick="switchCTab('mine')">Mes publications</div>
+      </div>
+
+      <div class="community-series-list" id="community-list">
+        <div class="community-empty"><div class="icon">⏳</div><p>Chargement…</p></div>
+      </div>
+    </div>
   </div>
 
     </main>
@@ -1598,6 +1694,59 @@ textarea.import-text{height:120px;resize:vertical;font-size:.82rem;}
 </div>
 
 <!-- ══════════════ MODALS ══════════════ -->
+
+<!-- PUBLISH MODAL -->
+<div class="modal-overlay" id="modal-publish">
+  <div class="modal">
+    <h3>📤 Partager une série</h3>
+    <p style="font-size:.8rem;color:var(--muted2);margin-bottom:1rem">
+      Choisis une de tes séries sauvegardées à partager avec la communauté.<br>
+      <strong>Ton identité est anonyme</strong> — seul un code privé te permettra de la supprimer.
+    </p>
+    <div id="publish-sets-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;max-height:280px;overflow-y:auto"></div>
+    <div id="publish-no-sets" style="display:none;color:var(--muted);font-size:.83rem;text-align:center;padding:.8rem">
+      Aucune série sauvegardée. Crée-en une d'abord dans l'onglet Séries !
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- PUBLISH CONFIRM MODAL -->
+<div class="modal-overlay" id="modal-publish-confirm">
+  <div class="modal">
+    <h3>✅ Série publiée !</h3>
+    <p style="font-size:.83rem;color:var(--muted2);margin-bottom:1rem">
+      Ta série est maintenant accessible à toute la communauté.
+    </p>
+    <div style="background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--rm);padding:14px;text-align:center;margin-bottom:1rem">
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px">TON CODE PRIVÉ DE SUPPRESSION</div>
+      <div style="font-family:monospace;font-size:1.2rem;letter-spacing:.15em;color:var(--accent2);font-weight:700" id="publish-delete-code">—</div>
+      <div style="font-size:.72rem;color:var(--red);margin-top:6px">⚠ Conserve ce code ! Tu en auras besoin pour supprimer ta série.</div>
+    </div>
+    <button class="btn btn-secondary btn-sm" style="width:100%;margin-bottom:8px" onclick="copyDeleteCode()">Copier le code</button>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-sm" onclick="closeModal()">J'ai noté le code</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE WITH CODE MODAL -->
+<div class="modal-overlay" id="modal-delete-code">
+  <div class="modal">
+    <h3>🗑 Supprimer cette série</h3>
+    <p style="font-size:.83rem;color:var(--muted2);margin-bottom:1rem">Entre ton code privé de suppression pour confirmer.</p>
+    <input id="delete-code-input" placeholder="Ton code privé (ex: ABCD-1234)" style="margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em;font-weight:600">
+    <div id="delete-code-error" style="display:none;color:var(--red);font-size:.78rem;margin-bottom:8px">Code incorrect.</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-sm" style="background:#e0707018;border:1px solid #e0707040;color:var(--red)" onclick="confirmDeleteWithCode()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- IMPORT CHOICE MODAL -->
 <div class="modal-overlay" id="modal-import-choice">
@@ -1826,6 +1975,7 @@ if(auth) auth.onAuthStateChanged(user => {
     setupListeners();
     applyPrefs();
     setTimeout(checkShareParam, 800);
+    loadAdmins();
   } else {
     currentUser = null;
     words=[]; sets=[]; history=[];
@@ -2433,7 +2583,22 @@ function exportWords(){
 function initSettingsScreen(){
   if(!currentUser) return;
   document.getElementById('profile-email-display').textContent = currentUser.email;
-  document.getElementById('settings-uid').textContent = 'ID : ' + currentUser.uid.slice(0,16)+'…';
+  document.getElementById('settings-uid').textContent = 'ID : ' + currentUser.uid;
+  // Email verification status
+  const verBadge = currentUser.emailVerified
+    ? '<span class="verified-badge">✅ E-mail vérifié</span>'
+    : '<span class="unverified-badge">⚠ E-mail non vérifié</span>';
+  document.getElementById('profile-email-display').innerHTML = esc(currentUser.email) + ' ' + verBadge;
+  // Admin panel
+  loadAdmins().then(()=>{
+    const adminPanelEl = document.getElementById('admin-panel');
+    if(adminPanelEl) adminPanelEl.style.display = isAdmin() ? 'block' : 'none';
+    if(isAdmin()) {
+      renderAdminList();
+      const addSection = document.getElementById('add-admin-section');
+      if(addSection) addSection.style.display = isOwner() ? 'block' : 'none';
+    }
+  });
   // Stats données
   const nb = words.length;
   const sess = history.length;
@@ -3134,6 +3299,7 @@ function todayKey(){ return new Date().toISOString().slice(0,10); }
 function initDiscover(){
   renderPublicSeries();
   renderDaily();
+  loadCommunity();
 }
 
 function renderDaily(){
@@ -3348,6 +3514,302 @@ function renderPublicSeries(){
 function importPublicSeries(i){
   const s = PUBLIC_SERIES[i];
   showImportChoice(JSON.parse(JSON.stringify(s.words)), s.title);
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// COMMUNITY SERIES SYSTEM
+// ══════════════════════════════════════════════════════════════
+const COMMUNITY_REF = () => db ? db.ref('community_series') : null;
+const ADMINS_REF    = () => db ? db.ref('admins') : null;
+const OWNER_UID     = "O2BudWS3ZLYQoGZF7EvsjiER3pw2"; // Maël Vervin — propriétaire unique
+let communityTab = 'all';
+let communityDeleteTarget = null;
+let _adminUIDs = {}; // {uid: {label, addedAt}} — chargé depuis Firebase
+
+// ── Propriétaire = toujours admin, peut gérer les autres admins ──
+function isOwner() {
+  return currentUser?.uid === OWNER_UID;
+}
+
+function isAdmin() {
+  if(!currentUser) return false;
+  return currentUser.uid === OWNER_UID || !!_adminUIDs[currentUser.uid];
+}
+
+// ── Load admins list ──
+async function loadAdmins() {
+  if(!db) return;
+  try {
+    const snap = await ADMINS_REF().get();
+    _adminUIDs = snap.exists() ? snap.val() : {};
+  } catch(e) { console.warn('loadAdmins:', e); }
+}
+
+// ── Add admin (owner only) ──
+async function addAdmin() {
+  if(!isOwner()) { toast('Accès refusé.', 'error'); return; }
+  const uid   = document.getElementById('new-admin-uid').value.trim();
+  const label = document.getElementById('new-admin-label').value.trim() || 'Admin';
+  if(!uid || uid.length < 10) { toast('UID invalide.', 'error'); return; }
+  if(uid === OWNER_UID) { toast('Tu es déjà propriétaire !', 'error'); return; }
+  try {
+    await ADMINS_REF().child(uid).set({label, addedAt: Date.now()});
+    _adminUIDs[uid] = {label, addedAt: Date.now()};
+    document.getElementById('new-admin-uid').value = '';
+    document.getElementById('new-admin-label').value = '';
+    renderAdminList();
+    toast('Admin ajouté ✓', 'success');
+  } catch(e) { toast('Erreur Firebase.', 'error'); }
+}
+
+// ── Remove admin (owner only) ──
+async function removeAdmin(uid) {
+  if(!isOwner()) { toast('Accès refusé.', 'error'); return; }
+  if(!confirm('Retirer cet admin ?')) return;
+  await ADMINS_REF().child(uid).remove();
+  delete _adminUIDs[uid];
+  renderAdminList();
+  toast('Admin retiré.', 'success');
+}
+
+function renderAdminList() {
+  const box = document.getElementById('admin-list');
+  if(!box) return;
+  const entries = Object.entries(_adminUIDs);
+  box.innerHTML = entries.length
+    ? entries.map(([uid, data]) => `
+        <div class="admin-uid-item">
+          <div>
+            <div class="admin-uid-email">${esc(data.label||'Admin')}</div>
+            <div style="font-size:.68rem;color:var(--muted)">Ajouté le ${new Date(data.addedAt).toLocaleDateString('fr-FR')}</div>
+          </div>
+          <button class="btn-icon" style="color:var(--red);width:28px;height:28px" onclick="removeAdmin('${uid}')">×</button>
+        </div>`).join('')
+    : '<div style="font-size:.78rem;color:var(--muted)">Aucun admin supplémentaire.</div>';
+}
+
+// ── Anonymous author token ──
+function getAnonToken() {
+  const key = 'anon_token_' + (currentUser?.uid || 'guest');
+  let t = localStorage.getItem(key);
+  if(!t) {
+    t = Math.random().toString(36).slice(2,8).toUpperCase() +
+        Math.random().toString(36).slice(2,8).toUpperCase();
+    localStorage.setItem(key, t);
+  }
+  return t;
+}
+
+// ── Load community series ──
+async function loadCommunity() {
+  const box = document.getElementById('community-list');
+  if(!box || !db) return;
+  box.innerHTML = '<div class="community-empty"><div class="icon">⏳</div><p>Chargement…</p></div>';
+  try {
+    const snap = await COMMUNITY_REF().orderByChild('ts').limitToLast(50).get();
+    const items = [];
+    if(snap.exists()) {
+      snap.forEach(child => {
+        items.push({id: child.key, ...child.val()});
+      });
+      items.sort((a,b) => b.ts - a.ts);
+    }
+    renderCommunity(items);
+  } catch(e) {
+    box.innerHTML = '<div class="community-empty"><p>Erreur de chargement.</p></div>';
+  }
+}
+
+function renderCommunity(items) {
+  const box = document.getElementById('community-list');
+  if(!box) return;
+  const anonToken = getAnonToken();
+  const filtered = communityTab === 'mine'
+    ? items.filter(s => s.anonToken === anonToken)
+    : items;
+
+  if(!filtered.length) {
+    box.innerHTML = '<div class="community-empty"><div class="icon">📭</div><p>' +
+      (communityTab === "mine" ? "Tu n\'as encore rien publié." : "Aucune série communautaire pour l\'instant. Sois le premier !") +
+      '</p></div>';
+    return;
+  }
+
+  box.innerHTML = filtered.map(s => {
+    const isOwn = s.anonToken === anonToken;
+    const canDelete = isOwn || isAdmin();
+    const badge = isOwn ? '<span class="own-badge">✏ Toi</span>'
+                : '<span class="anon-badge">👤 Anonyme</span>';
+    const importCount = s.imports || 0;
+    const date = new Date(s.ts).toLocaleDateString('fr-FR');
+    return `<div class="community-card">
+      <div class="community-card-header">
+        <div class="community-card-info">
+          <div class="community-card-name">${esc(s.name)} ${badge}</div>
+          <div class="community-card-meta">${s.wordCount} mots · ${date} · ⬇ ${importCount} import${importCount>1?'s':''}</div>
+          ${s.description?`<div style="font-size:.75rem;color:var(--muted2);margin-top:3px">${esc(s.description)}</div>`:''}
+        </div>
+        <div class="community-card-actions">
+          ${canDelete?`<button class="btn-icon" style="color:var(--red)" onclick="deleteCommunityPrompt('${s.id}','${isAdmin()?'admin':'code'}')" title="Supprimer">×</button>`:'  '}
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" style="width:100%" onclick="importCommunity('${s.id}')">Importer cette série</button>
+    </div>`;
+  }).join('');
+}
+
+function switchCTab(tab) {
+  communityTab = tab;
+  document.getElementById('ctab-all').classList.toggle('active', tab==='all');
+  document.getElementById('ctab-mine').classList.toggle('active', tab==='mine');
+  loadCommunity();
+}
+
+// ── Open publish modal ──
+function openPublishModal() {
+  openModal('modal-publish');
+  const list = document.getElementById('publish-sets-list');
+  const empty = document.getElementById('publish-no-sets');
+  if(!sets.length) {
+    list.style.display='none'; empty.style.display='block'; return;
+  }
+  empty.style.display='none'; list.style.display='flex';
+  list.innerHTML = sets.map((s,i) => `
+    <div class="community-card" style="cursor:pointer" onclick="publishSet(${i})">
+      <div class="community-card-header">
+        <div class="community-card-info">
+          <div class="community-card-name">${esc(s.name)}</div>
+          <div class="community-card-meta">${s.words.length} mots · ${s.date}</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();publishSet(${i})">Publier</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── Publish a set ──
+async function publishSet(setIdx) {
+  if(!db || !currentUser) { toast("Connecte-toi d'abord.", 'error'); return; }
+
+  // ── Check 1: email verified ──
+  await currentUser.reload(); // refresh token
+  if(!currentUser.emailVerified) {
+    toast("Vérifie ton adresse e-mail avant de publier !", 'error');
+    if(confirm("Un e-mail de vérification va t'être envoyé. Continuer ?")) {
+      await currentUser.sendEmailVerification();
+      toast("E-mail envoyé ! Vérifie ta boîte et reviens.", 'success');
+    }
+    return;
+  }
+
+  // ── Check 2: account older than 3 days ──
+  const createdAt = new Date(currentUser.metadata.creationTime).getTime();
+  const ageMs = Date.now() - createdAt;
+  const ageDays = ageMs / (1000 * 60 * 60 * 24);
+  if(ageDays < 3) {
+    const remaining = Math.ceil(3 - ageDays);
+    toast(`Compte trop récent. Reviens dans ${remaining} jour${remaining>1?'s':''} !`, 'error');
+    return;
+  }
+
+  const s = sets[setIdx];
+  if(!s) return;
+  closeModal();
+
+  const deleteCode = Math.random().toString(36).slice(2,6).toUpperCase() +
+                     '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  const anonToken = getAnonToken();
+  const payload = {
+    name: s.name,
+    wordCount: s.words.length,
+    words: s.words,
+    ts: Date.now(),
+    anonToken,
+    deleteCode, // stored in Firebase — author can verify it
+    imports: 0,
+    description: ''
+  };
+
+  try {
+    await COMMUNITY_REF().push(payload);
+    // Store deleteCode locally too
+    const myCodesKey = 'my_pub_codes_' + currentUser.uid;
+    const existing = JSON.parse(localStorage.getItem(myCodesKey)||'[]');
+    existing.push({name:s.name, deleteCode, ts:Date.now()});
+    localStorage.setItem(myCodesKey, JSON.stringify(existing));
+    // Show confirmation with code
+    document.getElementById('publish-delete-code').textContent = deleteCode;
+    openModal('modal-publish-confirm');
+    loadCommunity();
+    toast('Série publiée ! ✓', 'success');
+  } catch(e) {
+    toast('Erreur lors de la publication.', 'error');
+  }
+}
+
+let _lastCodeInput = '';
+function copyDeleteCode() {
+  const code = document.getElementById('publish-delete-code').textContent;
+  navigator.clipboard.writeText(code).then(()=>toast('Code copié !','success'));
+}
+
+// ── Import from community ──
+async function importCommunity(id) {
+  if(!db) return;
+  try {
+    const snap = await COMMUNITY_REF().child(id).get();
+    if(!snap.exists()) { toast('Série introuvable.','error'); return; }
+    const s = snap.val();
+    // Increment import counter
+    COMMUNITY_REF().child(id+'/imports').transaction(v=>(v||0)+1);
+    showImportChoice(JSON.parse(JSON.stringify(s.words)), s.name);
+  } catch(e) {
+    toast('Erreur lors du chargement.','error');
+  }
+}
+
+// ── Delete prompts ──
+function deleteCommunityPrompt(id, method) {
+  communityDeleteTarget = id;
+  if(method === 'admin') {
+    // Admin direct delete
+    if(confirm('Supprimer cette série de la communauté ?')) {
+      deleteCommunityById(id);
+    }
+  } else {
+    // Owner must enter code
+    document.getElementById('delete-code-input').value = '';
+    document.getElementById('delete-code-error').style.display = 'none';
+    openModal('modal-delete-code');
+  }
+}
+
+async function confirmDeleteWithCode() {
+  const entered = document.getElementById('delete-code-input').value.trim().toUpperCase();
+  if(!entered || !communityDeleteTarget || !db) return;
+  try {
+    const snap = await COMMUNITY_REF().child(communityDeleteTarget).get();
+    if(!snap.exists()) { closeModal(); loadCommunity(); return; }
+    const stored = snap.val().deleteCode;
+    if(entered === stored) {
+      await COMMUNITY_REF().child(communityDeleteTarget).remove();
+      closeModal();
+      communityDeleteTarget = null;
+      loadCommunity();
+      toast('Série supprimée.', 'success');
+    } else {
+      document.getElementById('delete-code-error').style.display = 'block';
+    }
+  } catch(e) {
+    toast('Erreur.','error');
+  }
+}
+
+async function deleteCommunityById(id) {
+  if(!db || !isAdmin()) return;
+  await COMMUNITY_REF().child(id).remove();
+  loadCommunity();
+  toast('Série supprimée (admin).','success');
 }
 
 // ══════════════════════════════════════════════════════════════
